@@ -167,18 +167,21 @@
 			}
 			
 			// (D.1) Prepare the object's parent. If the object doesn't have parent, 
-			// just assume it's derived from NSObject. There's a bug in doxygen implementation
-			// which doesn't list some super classes - NSManagedObject for example...
+			// just assume it's derived from NSObject, as long it's not NSObject itself.
+			// There's a bug in doxygen implementation which doesn't list some super
+			// classes - NSManagedObject for example...
 			// Although this doesn't properly work, at least the objects appear on the
 			// hierarchy. Note that we only do this for classes!
 			NSString* objectParent = nil;
 			NSArray* baseNodes = [objectNode nodesForXPath:@"base" error:nil];
 			if ([baseNodes count] == 0 && [objectKind isEqualToString:@"class"])
 			{
-				logInfo(@"- %@ class marked with no base, assuming NSObject!", objectName);
-				NSXMLElement* baseNode = [NSXMLElement elementWithName:@"base" stringValue:@"NSObject"];
-				[objectNode addChild:baseNode];
-				baseNodes = [objectNode nodesForXPath:@"base" error:nil];
+				if (![objectName isEqualToString:@"NSObject"]) {
+					logInfo(@"- %@ class marked with no base, assuming NSObject!", objectName);
+					NSXMLElement* baseNode = [NSXMLElement elementWithName:@"base" stringValue:@"NSObject"];
+					[objectNode addChild:baseNode];
+					baseNodes = [objectNode nodesForXPath:@"base" error:nil];
+				}
 			}
 			if ([baseNodes count] > 0) objectParent = [[baseNodes objectAtIndex:0] stringValue];
 			
