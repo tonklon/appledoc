@@ -27,6 +27,7 @@
 - (NSArray*)clangArgumentsForFilename:(NSString*)filename;
 - (void)createTranslationUnitWithContents:(NSString*)input filename:(NSString*)filename
                                 arguments:(NSArray*)arguments;
+- (NSUInteger)tokenize:(CXToken*)tokens inputLength:(NSUInteger)length;
 
 @end
 
@@ -63,6 +64,14 @@
 
   NSArray* arguments = [self clangArgumentsForFilename:filename];
   [self createTranslationUnitWithContents:input filename:filename arguments:arguments];
+  
+  CXToken* tokens;
+  
+  NSUInteger numberOfTokens = [self tokenize:tokens inputLength:[input length]];
+  
+  if (numberOfTokens == 0) {
+    return;
+  }
 }
 
 #pragma mark Properties
@@ -136,6 +145,26 @@
   
   NSAssert(self.file != NULL, @"failed to create file");
   
+}
+
+- (NSUInteger)tokenize:(CXToken*)tokens inputLength:(NSUInteger)length {
+  
+  CXSourceLocation start = clang_getLocationForOffset(self.translationUnit, self.file, 0);
+	CXSourceLocation end = clang_getLocationForOffset(self.translationUnit, self.file, length);
+  CXSourceRange wholeFileRange = clang_getRange(start, end);
+
+	if (clang_equalLocations(clang_getRangeStart(wholeFileRange), clang_getRangeEnd(wholeFileRange)))
+	{
+		GBLogDebug(@"File is empty. Nothing to do...");
+		return 0;
+	}
+  
+  GBLogDebug(@"Tokenizing...");
+	unsigned tokenCount;
+	clang_tokenize(self.translationUnit, wholeFileRange , &tokens, &tokenCount);
+	GBLogDebug(@"Found %i tokens", tokenCount);
+  
+  return tokenCount;
 }
 
 @end
