@@ -17,9 +17,11 @@
 @property (assign) CXFile file;
 @property (assign) CXToken* tokens;
 @property (assign) unsigned tokenCount;
+@property (assign) CXCursor* cursors;
   
 - (void)createTranslationUnitWithArguments:(NSArray*)arguments;
 - (void)tokenize;
+- (void)annotateTokens;
 
 @end
 
@@ -48,11 +50,14 @@
 @synthesize file;
 @synthesize tokens;
 @synthesize tokenCount;
+@synthesize cursors;
 
 - (void)dealloc {
   clang_disposeTokens(self.tu, self.tokens, self.tokenCount);
   clang_disposeTranslationUnit(self.tu);
 
+  free(self.cursors);
+  
   [super dealloc];
 }
 
@@ -123,6 +128,15 @@
   self.tokens = localTokens;
   self.tokenCount = numOfTokens;
   
+}
+
+- (void)annotateTokens {
+  CXCursor *localCursors = NULL;
+  
+  localCursors = calloc(sizeof(CXCursor), tokenCount);
+  clang_annotateTokens(self.tu, self.tokens, self.tokenCount, localCursors);
+  
+  self.cursors = localCursors;
 }
 
 #pragma mark - public
