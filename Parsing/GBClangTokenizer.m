@@ -125,5 +125,11 @@
   
 }
 
+#pragma mark - public
+
+- (GBModelBase*)getNextEntity {
+  return nil;
+}
+
  
 @end

@@ -28,6 +28,22 @@
 
 @end
 
+@interface GBClangBasedParser (StoreManagement)
+
+/** Registers the entity with the parsers store
+ 
+ The type of the entity is inspected to determin with which property of the store
+ the entity should be registerd.
+ 
+ @param entity The entity to register.
+ */
+- (void)registerEntityWithStore:(GBModelBase*)entity;
+- (void)registerClassWithStore:(GBClassData *)class;
+- (void)registerCategoryWithStore:(GBCategoryData *)category;
+- (void)registerProtocolWithStore:(GBProtocolData *)protocol;
+
+@end
+
 #pragma mark -
 
 @implementation GBClangBasedParser
@@ -63,6 +79,10 @@
   
   self.tokenizer = [GBClangTokenizer tokenizerWithContents:input filename:filename arguments:arguments index:self.index];
   
+  GBModelBase* entity;
+  while ((entity = [self.tokenizer getNextEntity]) != nil) {
+    [self registerEntityWithStore:entity];
+  }
   
 }
 
@@ -79,6 +99,21 @@
   [super dealloc];
 }
 
+- (void)registerEntityWithStore:(GBModelBase*)entity {
+  if ([entity isKindOfClass:[GBClassData class]]) {
+    GBClassData* class = (GBClassData*)entity;
+    [self registerClassWithStore:class];
+  }
+  if ([entity isKindOfClass:[GBProtocolData class]]) {
+    GBProtocolData* protocol = (GBProtocolData*)entity;
+    [self registerProtocolWithStore:protocol];
+  }
+  if ([entity isKindOfClass:[GBCategoryData class]]) {
+    GBCategoryData* category = (GBCategoryData*)entity;
+    [self registerCategoryWithStore:category];
+  }
+}
+
 @end
 
 @implementation GBClangBasedParser (ClangInterface)
@@ -90,6 +125,25 @@
           @"-std=gnu99",
           @"-D__IPHONE_OS_VERSION_MIN_REQUIRED=30000",
           nil];
+}
+
+@end
+
+@implementation GBClangBasedParser (StoreManagement)
+
+- (void)registerClassWithStore:(GBClassData *)class {
+  NSParameterAssert([class isKindOfClass:[GBClassData class]]);
+  [self.store registerClass:class];
+}
+
+- (void)registerCategoryWithStore:(GBCategoryData *)category {
+  NSParameterAssert([category isKindOfClass:[GBCategoryData class]]);
+  [self.store registerCategory:category];
+}
+
+- (void)registerProtocolWithStore:(GBProtocolData *)protocol {
+  NSParameterAssert([protocol isKindOfClass:[GBProtocolData class]]);
+  [self.store registerProtocol:protocol];
 }
 
 @end
