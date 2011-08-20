@@ -211,6 +211,8 @@
 		73FC741D11FE215E00AAD0B9 /* GBMethodData.m in Sources */ = {isa = PBXBuildFile; fileRef = 73FC741C11FE215E00AAD0B9 /* GBMethodData.m */; };
 		73FC742D11FE274300AAD0B9 /* GBMethodArgument.m in Sources */ = {isa = PBXBuildFile; fileRef = 73FC742C11FE274300AAD0B9 /* GBMethodArgument.m */; };
 		8DD76F9C0486AA7600D96B5E /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 08FB779EFE84155DC02AAC07 /* Foundation.framework */; };
+		E150014B13FFE3F300E005BE /* GBClangBasedParser.m in Sources */ = {isa = PBXBuildFile; fileRef = E150014A13FFE3F300E005BE /* GBClangBasedParser.m */; };
+		E150014C13FFE3F300E005BE /* GBClangBasedParser.m in Sources */ = {isa = PBXBuildFile; fileRef = E150014A13FFE3F300E005BE /* GBClangBasedParser.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -490,6 +492,8 @@
 		73FC742C11FE274300AAD0B9 /* GBMethodArgument.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GBMethodArgument.m; sourceTree = "<group>"; };
 		73FC743511FE2CEB00AAD0B9 /* GBMethodDataTesting.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GBMethodDataTesting.m; sourceTree = "<group>"; };
 		8DD76FA10486AA7600D96B5E /* appledoc */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = appledoc; sourceTree = BUILT_PRODUCTS_DIR; };
+		E150014913FFE3F300E005BE /* GBClangBasedParser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GBClangBasedParser.h; sourceTree = "<group>"; };
+		E150014A13FFE3F300E005BE /* GBClangBasedParser.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GBClangBasedParser.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -938,6 +942,8 @@
 				73FC6DB411FCCCC600AAD0B9 /* GBParser.m */,
 				73FC6DD911FCCE6B00AAD0B9 /* GBObjectiveCParser.h */,
 				73FC6DDA11FCCE6B00AAD0B9 /* GBObjectiveCParser.m */,
+				E150014913FFE3F300E005BE /* GBClangBasedParser.h */,
+				E150014A13FFE3F300E005BE /* GBClangBasedParser.m */,
 				73FC702611FCEB5300AAD0B9 /* GBTokenizer.h */,
 				73FC702711FCEB5300AAD0B9 /* GBTokenizer.m */,
 				73FC701011FCEA7200AAD0B9 /* PKToken+GBToken.h */,
@@ -1252,6 +1258,7 @@
 				73E1B7D4130BE72100E3D710 /* GBCommentsProcessor-RegistrationsTesting.m in Sources */,
 				73E1B7D6130BE7C000E3D710 /* GBCommentsProcessor-PreprocessingTesting.m in Sources */,
 				73E0CF46131047E700FAFEC0 /* GBCommentsProcessor-MarkdownTesting.m in Sources */,
+				E150014C13FFE3F300E005BE /* GBClangBasedParser.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1334,6 +1341,7 @@
 				73AF4ECC130938F3001152DB /* GBCommentComponentsList.m in Sources */,
 				73FAC0F9130BCB6F00F22475 /* GBCommentArgument.m in Sources */,
 				73C4C8611377DFF70024FA77 /* GBExitCodes.m in Sources */,
+				E150014B13FFE3F300E005BE /* GBClangBasedParser.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
