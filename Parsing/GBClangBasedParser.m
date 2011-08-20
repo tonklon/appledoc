@@ -128,9 +128,13 @@
     unsavedCount = 2;
   }
   self.translationUnit =
-  clang_createTranslationUnitFromSourceFile(self.index, fn, argc, argv, 0, unsaved);
+  clang_createTranslationUnitFromSourceFile(self.index, fn, argc, argv, unsavedCount, unsaved);
+  
+  NSAssert(self.translationUnit != NULL, @"failed to create translation unit");
   
   self.file = clang_getFile(self.translationUnit, fn);
+  
+  NSAssert(self.file != NULL, @"failed to create file");
   
 }
 
