@@ -211,6 +211,8 @@
 		73FC741D11FE215E00AAD0B9 /* GBMethodData.m in Sources */ = {isa = PBXBuildFile; fileRef = 73FC741C11FE215E00AAD0B9 /* GBMethodData.m */; };
 		73FC742D11FE274300AAD0B9 /* GBMethodArgument.m in Sources */ = {isa = PBXBuildFile; fileRef = 73FC742C11FE274300AAD0B9 /* GBMethodArgument.m */; };
 		8DD76F9C0486AA7600D96B5E /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 08FB779EFE84155DC02AAC07 /* Foundation.framework */; };
+		E150014613FFE33200E005BE /* libclang.a in Frameworks */ = {isa = PBXBuildFile; fileRef = E150014513FFE33200E005BE /* libclang.a */; };
+		E150014713FFE33200E005BE /* libclang.a in Frameworks */ = {isa = PBXBuildFile; fileRef = E150014513FFE33200E005BE /* libclang.a */; };
 		E150014B13FFE3F300E005BE /* GBClangBasedParser.m in Sources */ = {isa = PBXBuildFile; fileRef = E150014A13FFE3F300E005BE /* GBClangBasedParser.m */; };
 		E150014C13FFE3F300E005BE /* GBClangBasedParser.m in Sources */ = {isa = PBXBuildFile; fileRef = E150014A13FFE3F300E005BE /* GBClangBasedParser.m */; };
 /* End PBXBuildFile section */
@@ -492,6 +494,8 @@
 		73FC742C11FE274300AAD0B9 /* GBMethodArgument.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GBMethodArgument.m; sourceTree = "<group>"; };
 		73FC743511FE2CEB00AAD0B9 /* GBMethodDataTesting.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GBMethodDataTesting.m; sourceTree = "<group>"; };
 		8DD76FA10486AA7600D96B5E /* appledoc */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = appledoc; sourceTree = BUILT_PRODUCTS_DIR; };
+		E150014513FFE33200E005BE /* libclang.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libclang.a; path = lib/libclang.a; sourceTree = "<group>"; };
+		E150014813FFE38900E005BE /* Index.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = Index.h; path = "include/clang-c/Index.h"; sourceTree = "<group>"; };
 		E150014913FFE3F300E005BE /* GBClangBasedParser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GBClangBasedParser.h; sourceTree = "<group>"; };
 		E150014A13FFE3F300E005BE /* GBClangBasedParser.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GBClangBasedParser.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -511,6 +515,7 @@
 				73F5689E12A2244300A72BB2 /* SystemConfiguration.framework in Frameworks */,
 				73F568D412A22CFF00A72BB2 /* CoreServices.framework in Frameworks */,
 				7355E12F1312736D00B9C000 /* libmarkdown.a in Frameworks */,
+				E150014713FFE33200E005BE /* libclang.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -523,6 +528,7 @@
 				73F5689D12A2244300A72BB2 /* SystemConfiguration.framework in Frameworks */,
 				73F568D312A22CFF00A72BB2 /* CoreServices.framework in Frameworks */,
 				7355E12E1312736D00B9C000 /* libmarkdown.a in Frameworks */,
+				E150014613FFE33200E005BE /* libclang.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -548,6 +554,7 @@
 		08FB779DFE84155DC02AAC07 /* Libraries & Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				E150013B13FFE0FF00E005BE /* libclang */,
 				73FC720411FD7FB200AAD0B9 /* Copy to ~/Library/Frameworks!!! */,
 				73FC6FC411FCE9E900AAD0B9 /* ParseKit */,
 				7355E1301312737600B9C000 /* Discount */,
@@ -888,6 +895,7 @@
 		73F70E221227C7A600D19EBA /* Parsing */ = {
 			isa = PBXGroup;
 			children = (
+				E150014D13FFE8F200E005BE /* GBClangBasedParser-ClassParsingTesting.m */,
 				73FC6EAB11FCDD6900AAD0B9 /* GBObjectiveCParser-ClassParsingTesting.m */,
 				7367B85E11FEF76A005ED6CD /* GBObjectiveCParser-CategoryParsingTesting.m */,
 				7367B8D311FF07FF005ED6CD /* GBObjectiveCParser-ProtocolParsingTesting.m */,
@@ -1061,6 +1069,15 @@
 				7307B319124A1C2E007EC6B8 /* GBMethodSectionData.m */,
 			);
 			name = Helpers;
+			sourceTree = "<group>";
+		};
+		E150013B13FFE0FF00E005BE /* libclang */ = {
+			isa = PBXGroup;
+			children = (
+				E150014813FFE38900E005BE /* Index.h */,
+				E150014513FFE33200E005BE /* libclang.a */,
+			);
+			path = libclang;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -1364,6 +1381,7 @@
 				GCC_PREFIX_HEADER = appledoc_Prefix.pch;
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				HEADER_SEARCH_PATHS = (
+					"$(SRCROOT)/Libraries/libclang/include",
 					Libraries,
 					Common/ThirdParty/GRMustache,
 				);
@@ -1371,6 +1389,7 @@
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"\"$(SRCROOT)/Libraries\"",
+					"\"$(SRCROOT)/Libraries/libclang/lib\"",
 				);
 				PRODUCT_NAME = appledoc;
 			};
@@ -1389,6 +1408,7 @@
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = appledoc_Prefix.pch;
 				HEADER_SEARCH_PATHS = (
+					"$(SRCROOT)/Libraries/libclang/include",
 					Libraries,
 					Common/ThirdParty/GRMustache,
 				);
@@ -1396,6 +1416,7 @@
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"\"$(SRCROOT)/Libraries\"",
+					"\"$(SRCROOT)/Libraries/libclang/lib\"",
 				);
 				PRODUCT_NAME = appledoc;
 			};
@@ -1453,6 +1474,7 @@
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = AppledocTests_prefix.pch;
 				HEADER_SEARCH_PATHS = (
+					"$(SRCROOT)/Libraries/libclang/include",
 					Libraries,
 					Common/ThirdParty/GRMustache,
 				);
@@ -1461,6 +1483,7 @@
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"\"$(SRCROOT)/Libraries\"",
+					"\"$(SRCROOT)/Libraries/libclang/lib\"",
 				);
 				OTHER_LDFLAGS = (
 					"-framework",
@@ -1489,6 +1512,7 @@
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "$(SYSTEM_LIBRARY_DIR)/Frameworks/AppKit.framework/Headers/AppKit.h";
 				HEADER_SEARCH_PATHS = (
+					"$(SRCROOT)/Libraries/libclang/include",
 					Libraries,
 					Common/ThirdParty/GRMustache,
 				);
@@ -1497,6 +1521,7 @@
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"\"$(SRCROOT)/Libraries\"",
+					"\"$(SRCROOT)/Libraries/libclang/lib\"",
 				);
 				OTHER_LDFLAGS = (
 					"-framework",
