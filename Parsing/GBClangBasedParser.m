@@ -11,23 +11,20 @@
 #import "GBApplicationSettingsProvider.h"
 #import "GBDataObjects.h"
 #import "clang-c/Index.h"
+#import "GBClangTokenizer.h"
 
 @interface GBClangBasedParser ()
 
 @property (retain) GBStore *store;
 @property (retain) GBApplicationSettingsProvider *settings;
 @property (assign) CXIndex index;
-@property (assign) CXTranslationUnit translationUnit;
-@property (assign) CXFile file;
+@property (retain) GBClangTokenizer* tokenizer;
 
 @end
 
 @interface GBClangBasedParser (ClangInterface)
 
 - (NSArray*)clangArgumentsForFilename:(NSString*)filename;
-- (void)createTranslationUnitWithContents:(NSString*)input filename:(NSString*)filename
-                                arguments:(NSArray*)arguments;
-- (NSUInteger)tokenize:(CXToken*)tokens inputLength:(NSUInteger)length;
 
 @end
 
@@ -63,15 +60,10 @@
 	self.store = store;
 
   NSArray* arguments = [self clangArgumentsForFilename:filename];
-  [self createTranslationUnitWithContents:input filename:filename arguments:arguments];
   
-  CXToken* tokens;
+  self.tokenizer = [GBClangTokenizer tokenizerWithContents:input filename:filename arguments:arguments index:self.index];
   
-  NSUInteger numberOfTokens = [self tokenize:tokens inputLength:[input length]];
   
-  if (numberOfTokens == 0) {
-    return;
-  }
 }
 
 #pragma mark Properties
@@ -79,12 +71,10 @@
 @synthesize settings;
 @synthesize store;
 @synthesize index;
-@synthesize translationUnit;
-@synthesize file;
+@synthesize tokenizer;
 
 - (void)dealloc {
   clang_disposeIndex(self.index);
-  clang_disposeTranslationUnit(self.translationUnit);
   
   [super dealloc];
 }
@@ -100,71 +90,6 @@
           @"-std=gnu99",
           @"-D__IPHONE_OS_VERSION_MIN_REQUIRED=30000",
           nil];
-}
-
-- (void)createTranslationUnitWithContents:(NSString*)input
-                                 filename:(NSString*)filename
-                                arguments:(NSArray*)arguments {
-  
-  GBLogDebug(@"Creating translation unit...");
-
-  const char *fn = [filename UTF8String];
-	struct CXUnsavedFile unsaved[] = {
-		{fn, [input UTF8String], [input length]},
-		{NULL, NULL, 0}};
-  
-	self.file = NULL;
-	if (NULL != self.translationUnit)
-	{
-    clang_disposeTranslationUnit(self.translationUnit);
-  }
-  
-  const char *mainFile = fn;
-  unsigned argc = [arguments count];
-  const char *argv[argc];
-  int i=0;
-  for (NSString *arg in arguments)
-  {
-    argv[i++] = [arg UTF8String];
-  }
-  int unsavedCount = 1;
-  if ([@"h" isEqualToString: [filename pathExtension]])
-  {
-    unsaved[1].Filename = "/tmp/foo.m";
-    unsaved[1].Contents = [[NSString stringWithFormat: @"#import \"%@\"\n", filename] UTF8String];
-    unsaved[1].Length = strlen(unsaved[1].Contents);
-    mainFile = unsaved[1].Filename;
-    unsavedCount = 2;
-  }
-  self.translationUnit =
-  clang_createTranslationUnitFromSourceFile(self.index, fn, argc, argv, unsavedCount, unsaved);
-  
-  NSAssert(self.translationUnit != NULL, @"failed to create translation unit");
-  
-  self.file = clang_getFile(self.translationUnit, fn);
-  
-  NSAssert(self.file != NULL, @"failed to create file");
-  
-}
-
-- (NSUInteger)tokenize:(CXToken*)tokens inputLength:(NSUInteger)length {
-  
-  CXSourceLocation start = clang_getLocationForOffset(self.translationUnit, self.file, 0);
-	CXSourceLocation end = clang_getLocationForOffset(self.translationUnit, self.file, length);
-  CXSourceRange wholeFileRange = clang_getRange(start, end);
-
-	if (clang_equalLocations(clang_getRangeStart(wholeFileRange), clang_getRangeEnd(wholeFileRange)))
-	{
-		GBLogDebug(@"File is empty. Nothing to do...");
-		return 0;
-	}
-  
-  GBLogDebug(@"Tokenizing...");
-	unsigned tokenCount;
-	clang_tokenize(self.translationUnit, wholeFileRange , &tokens, &tokenCount);
-	GBLogDebug(@"Found %i tokens", tokenCount);
-  
-  return tokenCount;
 }
 
 @end
