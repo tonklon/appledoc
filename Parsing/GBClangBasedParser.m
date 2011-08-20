@@ -42,7 +42,7 @@
 
 - (id)initWithSettingsProvider:(id)settingsProvider {
 	NSParameterAssert(settingsProvider != nil);
-	GBLogDebug(@"Initializing objective-c parser with settings provider %@...", settingsProvider);
+	GBLogDebug(@"Initializing clang-based parser with settings provider %@...", settingsProvider);
 	self = [super init];
 	if (self) {
 		self.settings = settingsProvider;
@@ -58,7 +58,7 @@
 	NSParameterAssert(filename != nil);
 	NSParameterAssert([filename length] > 0);
 	NSParameterAssert(store != nil);
-	GBLogDebug(@"Parsing objective-c objects...");
+	GBLogDebug(@"Parsing file...");
 	self.store = store;
 
   NSArray* arguments = [self clangArgumentsForFilename:filename];
@@ -97,6 +97,8 @@
                                  filename:(NSString*)filename
                                 arguments:(NSArray*)arguments {
   
+  GBLogDebug(@"Creating translation unit...");
+
   const char *fn = [filename UTF8String];
 	struct CXUnsavedFile unsaved[] = {
 		{fn, [input UTF8String], [input length]},
