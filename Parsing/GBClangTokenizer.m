@@ -462,7 +462,126 @@ clang_disposeString( name ## str);
 }
 
 - (GBProtocolData*)protocolEntityFromCurrentCursor {
-  return nil;
+  CXCursor currentCursor = cursors[currentToken];
+  
+  CX2NS_STRING(protocolName, clang_getCursorSpelling(currentCursor));
+  
+  NSMutableArray* adoptedProtocols = [NSMutableArray array];
+  NSMutableArray* methods = [NSMutableArray array];
+  
+  
+  clang_visitChildrenWithBlock(currentCursor,
+   ^enum CXChildVisitResult (CXCursor current, CXCursor parent){
+     
+     switch (current.kind) {
+       case CXCursor_ObjCProtocolRef:
+       {
+         CX2NS_STRING(protocolName, clang_getCursorSpelling(current));
+         GBProtocolData *protocol = [[GBProtocolData alloc] initWithName:protocolName];
+         [adoptedProtocols addObject:protocol];
+         break;
+       }
+       case CXCursor_ObjCClassMethodDecl:
+       case CXCursor_ObjCInstanceMethodDecl:
+       {
+         CX2NS_STRING(methodName, clang_getCursorSpelling(current));
+         
+         NSArray* argumentNames = [methodName componentsSeparatedByString:@":"];
+         
+         CXType type = clang_getCursorResultType(current);
+         
+         NSString* typeName = nil;
+         if (0 == clang_isPODType(type)) {
+           CX2NS_STRING(typeKind, clang_getTypeKindSpelling(type.kind));
+           typeName = typeKind;
+         } else {
+           CXCursor typeCursor = clang_getTypeDeclaration(type);
+           CX2NS_STRING(declarationName, clang_getCursorSpelling(typeCursor));
+           typeName = declarationName;
+         }
+         
+         NSMutableArray* methodArguments = [NSMutableArray array];
+         
+         clang_visitChildrenWithBlock(current,
+          ^enum CXChildVisitResult (CXCursor current, CXCursor parent){
+            switch (current.kind) {
+              case CXCursor_ParmDecl:
+              {
+                CX2NS_STRING(name, clang_getCursorSpelling(current));
+                
+                CXType type = clang_getCursorType(current);
+                NSString* typeName = nil;
+                if (0 == clang_isPODType(type)) {
+                  CX2NS_STRING(typeKind, clang_getTypeKindSpelling(type.kind));
+                  typeName = typeKind;
+                } else {
+                  CXCursor typeCursor = clang_getTypeDeclaration(type);
+                  CX2NS_STRING(declarationName, clang_getCursorSpelling(typeCursor));
+                  typeName = declarationName;
+                }
+                
+                NSString* argumentName = [argumentNames objectAtIndex:[methodArguments count]];
+                GBMethodArgument* argument = [[GBMethodArgument alloc] initWithName:argumentName types:[NSArray arrayWithObject:typeName] var:[NSArray arrayWithObject:name] terminationMacros:nil];
+                [methodArguments addObject:argument];
+                
+                break;  
+              }
+              default: {
+                
+                break;
+              }
+            }
+            return CXChildVisit_Continue;                        
+          });
+         
+         GBMethodType methodKind;
+         if (current.kind == CXCursor_ObjCInstanceMethodDecl) {
+           methodKind = GBMethodTypeInstance;
+         } else {
+           methodKind = GBMethodTypeClass;
+         }
+         
+         // If no arguments, we still need one to transport the method name
+         if ([methodArguments count] == 0) {
+           GBMethodArgument* noRealArgument = [[GBMethodArgument alloc] initWithName:[argumentNames objectAtIndex:0] types:[NSArray array] var:nil terminationMacros:nil];
+           [methodArguments addObject:noRealArgument];
+         }
+         
+         GBMethodData* method = [[GBMethodData alloc] initWithType:methodKind attributes:nil result:[NSArray arrayWithObject:typeName] arguments:methodArguments];
+         
+         [methods addObject:method];
+         break;
+       }
+       default:
+       {
+         CX2NS_STRING(kind, clang_getCursorKindSpelling(current.kind));
+         CX2NS_STRING(name, clang_getCursorSpelling(current));
+         
+         NSLog(@"%@ %@",kind,name);
+         break;
+       }
+     }
+     
+     return CXChildVisit_Continue;
+   });
+  
+  
+  GBProtocolData* protocol = [[GBProtocolData alloc] initWithName:protocolName];
+  [protocol registerSourceInfo:[self sourceInfoForCurrentToken]];
+  
+  for (GBProtocolData* adoptedProtocol in adoptedProtocols) {
+    [protocol.adoptedProtocols registerProtocol:adoptedProtocol];
+  }
+  
+  for (GBMethodData* method in methods) {
+    [protocol.methods registerMethod:method];
+  }
+  
+  GBComment* comment = [self findLastComment];
+  
+  protocol.comment = comment;
+  
+  return protocol;
 }
 
 - (GBSourceInfo*)sourceInfoForCurrentToken {
