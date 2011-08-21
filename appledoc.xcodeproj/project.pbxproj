@@ -211,6 +211,7 @@
 		73FC741D11FE215E00AAD0B9 /* GBMethodData.m in Sources */ = {isa = PBXBuildFile; fileRef = 73FC741C11FE215E00AAD0B9 /* GBMethodData.m */; };
 		73FC742D11FE274300AAD0B9 /* GBMethodArgument.m in Sources */ = {isa = PBXBuildFile; fileRef = 73FC742C11FE274300AAD0B9 /* GBMethodArgument.m */; };
 		8DD76F9C0486AA7600D96B5E /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 08FB779EFE84155DC02AAC07 /* Foundation.framework */; };
+		E13867841401442900CDD0B7 /* GBClangBasedParser-CategoryParsingTesting.m in Sources */ = {isa = PBXBuildFile; fileRef = E13867831401442900CDD0B7 /* GBClangBasedParser-CategoryParsingTesting.m */; };
 		E150014613FFE33200E005BE /* libclang.a in Frameworks */ = {isa = PBXBuildFile; fileRef = E150014513FFE33200E005BE /* libclang.a */; };
 		E150014713FFE33200E005BE /* libclang.a in Frameworks */ = {isa = PBXBuildFile; fileRef = E150014513FFE33200E005BE /* libclang.a */; };
 		E150014B13FFE3F300E005BE /* GBClangBasedParser.m in Sources */ = {isa = PBXBuildFile; fileRef = E150014A13FFE3F300E005BE /* GBClangBasedParser.m */; };
@@ -497,6 +498,7 @@
 		73FC742C11FE274300AAD0B9 /* GBMethodArgument.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GBMethodArgument.m; sourceTree = "<group>"; };
 		73FC743511FE2CEB00AAD0B9 /* GBMethodDataTesting.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GBMethodDataTesting.m; sourceTree = "<group>"; };
 		8DD76FA10486AA7600D96B5E /* appledoc */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = appledoc; sourceTree = BUILT_PRODUCTS_DIR; };
+		E13867831401442900CDD0B7 /* GBClangBasedParser-CategoryParsingTesting.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "GBClangBasedParser-CategoryParsingTesting.m"; sourceTree = "<group>"; };
 		E150014513FFE33200E005BE /* libclang.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libclang.a; path = lib/libclang.a; sourceTree = "<group>"; };
 		E150014813FFE38900E005BE /* Index.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = Index.h; path = "include/clang-c/Index.h"; sourceTree = "<group>"; };
 		E150014913FFE3F300E005BE /* GBClangBasedParser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GBClangBasedParser.h; sourceTree = "<group>"; };
@@ -902,6 +904,7 @@
 			isa = PBXGroup;
 			children = (
 				E150015213FFFF6900E005BE /* GBClangBasedParser-ClassParsingTesting.m */,
+				E13867831401442900CDD0B7 /* GBClangBasedParser-CategoryParsingTesting.m */,
 				73FC6EAB11FCDD6900AAD0B9 /* GBObjectiveCParser-ClassParsingTesting.m */,
 				7367B85E11FEF76A005ED6CD /* GBObjectiveCParser-CategoryParsingTesting.m */,
 				7367B8D311FF07FF005ED6CD /* GBObjectiveCParser-ProtocolParsingTesting.m */,
@@ -1286,6 +1289,7 @@
 				E150014C13FFE3F300E005BE /* GBClangBasedParser.m in Sources */,
 				E150015313FFFF6900E005BE /* GBClangBasedParser-ClassParsingTesting.m in Sources */,
 				E150015714000BA600E005BE /* GBClangTokenizer.m in Sources */,
+				E13867841401442900CDD0B7 /* GBClangBasedParser-CategoryParsingTesting.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
