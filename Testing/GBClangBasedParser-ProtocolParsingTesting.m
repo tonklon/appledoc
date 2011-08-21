@@ -99,6 +99,7 @@
 	GBStore *store = [[GBStore alloc] init];
 	// execute
 	[parser parseObjectsFromString:
+   @"#define SOMETHING"
 	 @"/** Comment */\n"
 	 @"#ifdef SOMETHING\n"
 	 @"@protocol MyProtocol\n"
@@ -131,9 +132,9 @@
 	GBClangBasedParser *parser = [GBClangBasedParser parserWithSettingsProvider:[GBTestObjectsRegistry mockSettingsProvider]];
 	GBStore *store = [[GBStore alloc] init];
 	// execute
-	[parser parseObjectsFromString:@"@protocol MyProtocol <Protocol1, Protocol2> @end" sourceFile:@"filename.h" toStore:store];
+	[parser parseObjectsFromString:@"@protocol Protocol1 @end @protocol Protocol2 @end @protocol MyProtocol <Protocol1, Protocol2> @end" sourceFile:@"filename.h" toStore:store];
 	// verify
-	GBProtocolData *protocol = [[store protocols] anyObject];
+	GBProtocolData *protocol = [store protocolWithName:@"MyProtocol"];
 	NSArray *protocols = [protocol.adoptedProtocols protocolsSortedByName];
 	assertThatInteger([protocols count], equalToInteger(2));
 	assertThat([[protocols objectAtIndex:0] nameOfProtocol], is(@"Protocol1"));
