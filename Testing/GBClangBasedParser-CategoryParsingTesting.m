@@ -24,7 +24,7 @@
 	GBClangBasedParser *parser = [GBClangBasedParser parserWithSettingsProvider:[GBTestObjectsRegistry mockSettingsProvider]];
 	GBStore *store = [[GBStore alloc] init];
 	// execute
-	[parser parseObjectsFromString:@"@interface MyClass (MyCategory) @end" sourceFile:@"filename.h" toStore:store];
+	[parser parseObjectsFromString:@"@interface MyClass\n@end\n@interface MyClass (MyCategory) @end" sourceFile:@"filename.h" toStore:store];
 	// verify
 	NSArray *categories = [store categoriesSortedByName];
 	assertThatInteger([categories count], equalToInteger(1));
@@ -37,7 +37,7 @@
 	GBClangBasedParser *parser = [GBClangBasedParser parserWithSettingsProvider:[GBTestObjectsRegistry mockSettingsProvider]];
 	GBStore *store = [[GBStore alloc] init];
 	// execute
-	[parser parseObjectsFromString:@"@interface MyClass(MyCategory) @end" sourceFile:@"filename.h" toStore:store];
+	[parser parseObjectsFromString:@"@interface MyClass @end @interface MyClass(MyCategory) @end" sourceFile:@"filename.h" toStore:store];
 	// verify
 	NSSet *files = [[[store categoriesSortedByName] objectAtIndex:0] sourceInfos];
 	assertThatInteger([files count], equalToInteger(1));
@@ -50,7 +50,7 @@
 	GBClangBasedParser *parser = [GBClangBasedParser parserWithSettingsProvider:[GBTestObjectsRegistry mockSettingsProvider]];
 	GBStore *store = [[GBStore alloc] init];
 	// execute
-	[parser parseObjectsFromString:@"\n// cmt\n\n#define DEBUG\n\n/// hello\n@interface MyClass(MyCategory) @end" sourceFile:@"filename.h" toStore:store];
+	[parser parseObjectsFromString:@"@interface MyClass @end \n// cmt\n\n#define DEBUG\n\n/// hello\n@interface MyClass(MyCategory) @end" sourceFile:@"filename.h" toStore:store];
 	// verify
 	NSSet *files = [[[store categoriesSortedByName] objectAtIndex:0] sourceInfos];
 	assertThatInteger([[files anyObject] lineNumber], equalToInteger(7));
@@ -61,7 +61,7 @@
 	GBClangBasedParser *parser = [GBClangBasedParser parserWithSettingsProvider:[GBTestObjectsRegistry mockSettingsProvider]];
 	GBStore *store = [[GBStore alloc] init];
 	// execute
-	[parser parseObjectsFromString:@"@interface MyClass(MyCategory1) @end   @interface MyClass(MyCategory2) @end" sourceFile:@"filename.h" toStore:store];
+	[parser parseObjectsFromString:@"@interface MyClass @end @interface MyClass(MyCategory1) @end   @interface MyClass(MyCategory2) @end" sourceFile:@"filename.h" toStore:store];
 	// verify
 	NSArray *categories = [store categoriesSortedByName];
 	assertThatInteger([categories count], equalToInteger(2));
@@ -76,7 +76,7 @@
 	GBClangBasedParser *parser = [GBClangBasedParser parserWithSettingsProvider:[GBTestObjectsRegistry mockSettingsProvider]];
 	GBStore *store = [[GBStore alloc] init];
 	// execute
-	[parser parseObjectsFromString:@"@implementation MyClass (MyCategory) @end" sourceFile:@"filename.h" toStore:store];
+	[parser parseObjectsFromString:@"@interface MyClass @end @implementation MyClass (MyCategory) @end" sourceFile:@"filename.h" toStore:store];
 	// verify
 	NSArray *categories = [store categoriesSortedByName];
 	assertThatInteger([categories count], equalToInteger(1));
@@ -89,7 +89,7 @@
 	GBClangBasedParser *parser = [GBClangBasedParser parserWithSettingsProvider:[GBTestObjectsRegistry mockSettingsProvider]];
 	GBStore *store = [[GBStore alloc] init];
 	// execute
-	[parser parseObjectsFromString:@"@implementation MyClass(MyCategory) @end" sourceFile:@"filename.h" toStore:store];
+	[parser parseObjectsFromString:@"@interface MyClass @end @implementation MyClass(MyCategory) @end" sourceFile:@"filename.h" toStore:store];
 	// verify
 	NSSet *files = [[[store categoriesSortedByName] objectAtIndex:0] sourceInfos];
 	assertThatInteger([files count], equalToInteger(1));
@@ -102,7 +102,7 @@
 	GBClangBasedParser *parser = [GBClangBasedParser parserWithSettingsProvider:[GBTestObjectsRegistry mockSettingsProvider]];
 	GBStore *store = [[GBStore alloc] init];
 	// execute
-	[parser parseObjectsFromString:@"\n// cmt\n\n#define DEBUG\n\n/// hello\n@implementation MyClass(MyCategory) @end" sourceFile:@"filename.h" toStore:store];
+	[parser parseObjectsFromString:@"@interface MyClass @end \n// cmt\n\n#define DEBUG\n\n/// hello\n@implementation MyClass(MyCategory) @end" sourceFile:@"filename.h" toStore:store];
 	// verify
 	NSSet *files = [[[store categoriesSortedByName] objectAtIndex:0] sourceInfos];
 	assertThatInteger([[files anyObject] lineNumber], equalToInteger(7));
@@ -113,7 +113,7 @@
 	GBClangBasedParser *parser = [GBClangBasedParser parserWithSettingsProvider:[GBTestObjectsRegistry mockSettingsProvider]];
 	GBStore *store = [[GBStore alloc] init];
 	// execute
-	[parser parseObjectsFromString:@"@implementation MyClass(MyCategory1) @end   @implementation MyClass(MyCategory2) @end" sourceFile:@"filename.h" toStore:store];
+	[parser parseObjectsFromString:@"@interface MyClass @end @implementation MyClass(MyCategory1) @end   @implementation MyClass(MyCategory2) @end" sourceFile:@"filename.h" toStore:store];
 	// verify
 	NSArray *categories = [store categoriesSortedByName];
 	assertThatInteger([categories count], equalToInteger(2));
@@ -128,7 +128,7 @@
 	GBClangBasedParser *parser = [GBClangBasedParser parserWithSettingsProvider:[GBTestObjectsRegistry mockSettingsProvider]];
 	GBStore *store = [[GBStore alloc] init];
 	// execute
-	[parser parseObjectsFromString:@"@interface MyClass () @end" sourceFile:@"filename.h" toStore:store];
+	[parser parseObjectsFromString:@"@interface MyClass @end @interface MyClass () @end" sourceFile:@"filename.h" toStore:store];
 	// verify
 	NSArray *categories = [store categoriesSortedByName];
 	assertThatInteger([categories count], equalToInteger(1));
@@ -141,7 +141,7 @@
 	GBClangBasedParser *parser = [GBClangBasedParser parserWithSettingsProvider:[GBTestObjectsRegistry mockSettingsProvider]];
 	GBStore *store = [[GBStore alloc] init];
 	// execute
-	[parser parseObjectsFromString:@"@interface MyClass() @end" sourceFile:@"filename.h" toStore:store];
+	[parser parseObjectsFromString:@"@interface MyClass @end @interface MyClass() @end" sourceFile:@"filename.h" toStore:store];
 	// verify
 	NSSet *files = [[[store categoriesSortedByName] objectAtIndex:0] sourceInfos];
 	assertThatInteger([files count], equalToInteger(1));
@@ -154,7 +154,7 @@
 	GBClangBasedParser *parser = [GBClangBasedParser parserWithSettingsProvider:[GBTestObjectsRegistry mockSettingsProvider]];
 	GBStore *store = [[GBStore alloc] init];
 	// execute
-	[parser parseObjectsFromString:@"\n// cmt\n\n#define DEBUG\n\n/// hello\n@interface MyClass() @end" sourceFile:@"filename.h" toStore:store];
+	[parser parseObjectsFromString:@"@interface MyClass @end \n// cmt\n\n#define DEBUG\n\n/// hello\n@interface MyClass() @end" sourceFile:@"filename.h" toStore:store];
 	// verify
 	NSSet *files = [[[store categoriesSortedByName] objectAtIndex:0] sourceInfos];
 	assertThatInteger([[files anyObject] lineNumber], equalToInteger(7));
@@ -165,7 +165,7 @@
 	GBClangBasedParser *parser = [GBClangBasedParser parserWithSettingsProvider:[GBTestObjectsRegistry mockSettingsProvider]];
 	GBStore *store = [[GBStore alloc] init];
 	// execute
-	[parser parseObjectsFromString:@"@interface MyClass1() @end   @interface MyClass2() @end" sourceFile:@"filename.h" toStore:store];
+	[parser parseObjectsFromString:@"@interface MyClass1 @end @interface MyClass2 @end @interface MyClass1() @end   @interface MyClass2() @end" sourceFile:@"filename.h" toStore:store];
 	// verify
 	NSArray *categories = [store categoriesSortedByName];
 	assertThatInteger([categories count], equalToInteger(2));
@@ -180,7 +180,7 @@
 	GBClangBasedParser *parser = [GBClangBasedParser parserWithSettingsProvider:[GBTestObjectsRegistry mockSettingsProvider]];
 	GBStore *store = [[GBStore alloc] init];
 	// execute
-	[parser parseObjectsFromString:@"/** Comment */ @interface MyClass(MyCategory) @end" sourceFile:@"filename.h" toStore:store];
+	[parser parseObjectsFromString:@"@interface MyClass @end /** Comment */ @interface MyClass(MyCategory) @end" sourceFile:@"filename.h" toStore:store];
 	// verify
 	GBCategoryData *category = [[store categories] anyObject];
 	assertThat(category.comment.stringValue, is(@"Comment"));
@@ -191,7 +191,7 @@
 	GBClangBasedParser *parser = [GBClangBasedParser parserWithSettingsProvider:[GBTestObjectsRegistry mockSettingsProvider]];
 	GBStore *store = [[GBStore alloc] init];
 	// execute
-	[parser parseObjectsFromString:@"/** Comment */ @implementation MyClass(MyCategory) @end" sourceFile:@"filename.m" toStore:store];
+	[parser parseObjectsFromString:@"@interface MyClass @end /** Comment */ @implementation MyClass(MyCategory) @end" sourceFile:@"filename.m" toStore:store];
 	// verify
 	GBCategoryData *category = [[store categories] anyObject];
 	assertThat(category.comment.stringValue, is(@"Comment"));
@@ -202,7 +202,7 @@
 	GBClangBasedParser *parser = [GBClangBasedParser parserWithSettingsProvider:[GBTestObjectsRegistry mockSettingsProvider]];
 	GBStore *store = [[GBStore alloc] init];
 	// execute
-	[parser parseObjectsFromString:@"/** Comment */ @interface MyClass() @end" sourceFile:@"filename.h" toStore:store];
+	[parser parseObjectsFromString:@"@interface MyClass @end /** Comment */ @interface MyClass() @end" sourceFile:@"filename.h" toStore:store];
 	// verify
 	GBCategoryData *category = [[store categories] anyObject];
 	assertThat(category.comment.stringValue, is(@"Comment"));
@@ -213,7 +213,7 @@
 	GBClangBasedParser *parser = [GBClangBasedParser parserWithSettingsProvider:[GBTestObjectsRegistry mockSettingsProvider]];
 	GBStore *store = [[GBStore alloc] init];
 	// execute
-	[parser parseObjectsFromString:@"/// comment\n\n#define SOMETHING\n\n/** comment */ @interface MyClass(MyCategory) @end" sourceFile:@"filename.h" toStore:store];
+	[parser parseObjectsFromString:@"@interface MyClass @end /// comment\n\n#define SOMETHING\n\n/** comment */ @interface MyClass(MyCategory) @end" sourceFile:@"filename.h" toStore:store];
 	// verify
 	GBClassData *category = [[store categories] anyObject];
 	assertThat(category.comment.sourceInfo.filename, is(@"filename.h"));
@@ -225,7 +225,7 @@
 	GBClangBasedParser *parser = [GBClangBasedParser parserWithSettingsProvider:[GBTestObjectsRegistry mockSettingsProvider]];
 	GBStore *store = [[GBStore alloc] init];
 	// execute
-	[parser parseObjectsFromString:@"/// comment\n\n#define SOMETHING\n\n/** comment */ @implementation MyClass(MyCategory) @end" sourceFile:@"filename.h" toStore:store];
+	[parser parseObjectsFromString:@"@interface MyClass @end /// comment\n\n#define SOMETHING\n\n/** comment */ @implementation MyClass(MyCategory) @end" sourceFile:@"filename.h" toStore:store];
 	// verify
 	GBClassData *category = [[store categories] anyObject];
 	assertThat(category.comment.sourceInfo.filename, is(@"filename.h"));
@@ -237,7 +237,7 @@
 	GBClangBasedParser *parser = [GBClangBasedParser parserWithSettingsProvider:[GBTestObjectsRegistry mockSettingsProvider]];
 	GBStore *store = [[GBStore alloc] init];
 	// execute
-	[parser parseObjectsFromString:@"/// comment\n\n#define SOMETHING\n\n/** comment */ @interface MyClass() @end" sourceFile:@"filename.h" toStore:store];
+	[parser parseObjectsFromString:@"@interface MyClass @end /// comment\n\n#define SOMETHING\n\n/** comment */ @interface MyClass() @end" sourceFile:@"filename.h" toStore:store];
 	// verify
 	GBClassData *category = [[store categories] anyObject];
 	assertThat(category.comment.sourceInfo.filename, is(@"filename.h"));
@@ -250,7 +250,8 @@
 	GBStore *store = [[GBStore alloc] init];
 	// execute
 	[parser parseObjectsFromString:
-	 @"/** Comment */\n"
+   @"#define SOMETHING\n"
+	 @"@interface MyClass @end /** Comment */\n"
 	 @"#ifdef SOMETHING\n"
 	 @"@interface MyClass (MyCategory)\n"
 	 @"#else\n"
@@ -269,7 +270,7 @@
 	GBClangBasedParser *parser = [GBClangBasedParser parserWithSettingsProvider:[GBTestObjectsRegistry mockSettingsProvider]];
 	GBStore *store = [[GBStore alloc] init];
 	// execute
-	[parser parseObjectsFromString:@"/** Comment */ @interface MyClass(MyCategory) -(void)method; @end" sourceFile:@"filename.h" toStore:store];
+	[parser parseObjectsFromString:@"@interface MyClass @end /** Comment */ @interface MyClass(MyCategory) -(void)method; @end" sourceFile:@"filename.h" toStore:store];
 	// verify
 	GBCategoryData *category = [store.categories anyObject];
 	GBMethodData *method = [category.methods.methods lastObject];
@@ -283,7 +284,7 @@
 	GBClangBasedParser *parser = [GBClangBasedParser parserWithSettingsProvider:[GBTestObjectsRegistry mockSettingsProvider]];
 	GBStore *store = [[GBStore alloc] init];
 	// execute
-	[parser parseObjectsFromString:@"@interface MyClass(MyCategory) <Protocol> @end" sourceFile:@"filename.h" toStore:store];
+	[parser parseObjectsFromString:@"@interface MyClass @end @protocol Protocol @end @interface MyClass(MyCategory) <Protocol> @end" sourceFile:@"filename.h" toStore:store];
 	// verify
 	GBCategoryData *category = [[store categories] anyObject];
 	NSArray *protocols = [category.adoptedProtocols protocolsSortedByName];
@@ -296,7 +297,7 @@
 	GBClangBasedParser *parser = [GBClangBasedParser parserWithSettingsProvider:[GBTestObjectsRegistry mockSettingsProvider]];
 	GBStore *store = [[GBStore alloc] init];
 	// execute
-	[parser parseObjectsFromString:@"@interface MyClass(MyCategory) -(void)method; @end" sourceFile:@"filename.h" toStore:store];
+	[parser parseObjectsFromString:@"@interface MyClass @end @interface MyClass(MyCategory) -(void)method; @end" sourceFile:@"filename.h" toStore:store];
 	// verify
 	GBCategoryData *category = [[store categories] anyObject];
 	NSArray *methods = [category.methods methods];
@@ -309,7 +310,7 @@
 	GBClangBasedParser *parser = [GBClangBasedParser parserWithSettingsProvider:[GBTestObjectsRegistry mockSettingsProvider]];
 	GBStore *store = [[GBStore alloc] init];
 	// execute
-	[parser parseObjectsFromString:@"@interface MyClass(MyCategory) @property (readonly) int name; @end" sourceFile:@"filename.h" toStore:store];
+	[parser parseObjectsFromString:@"@interface MyClass @end @interface MyClass(MyCategory) @property (readonly) int name; @end" sourceFile:@"filename.h" toStore:store];
 	// verify
 	GBCategoryData *category = [[store categories] anyObject];
 	NSArray *methods = [category.methods methods];
@@ -324,7 +325,7 @@
 	GBClangBasedParser *parser = [GBClangBasedParser parserWithSettingsProvider:[GBTestObjectsRegistry mockSettingsProvider]];
 	GBStore *store = [[GBStore alloc] init];
 	// execute
-	[parser parseObjectsFromString:@"@interface MyClass(MyCategory) <Protocol> @end" sourceFile:@"filename.h" toStore:store];
+	[parser parseObjectsFromString:@"@interface MyClass @end @protocol Protocol @end @interface MyClass(MyCategory) <Protocol> @end" sourceFile:@"filename.h" toStore:store];
 	// verify
 	GBCategoryData *extension = [[store categories] anyObject];
 	NSArray *protocols = [extension.adoptedProtocols protocolsSortedByName];
@@ -337,7 +338,7 @@
 	GBClangBasedParser *parser = [GBClangBasedParser parserWithSettingsProvider:[GBTestObjectsRegistry mockSettingsProvider]];
 	GBStore *store = [[GBStore alloc] init];
 	// execute
-	[parser parseObjectsFromString:@"@interface MyClass(MyCategory) -(void)method; @end" sourceFile:@"filename.h" toStore:store];
+	[parser parseObjectsFromString:@"@interface MyClass @end @interface MyClass(MyCategory) -(void)method; @end" sourceFile:@"filename.h" toStore:store];
 	// verify
 	GBCategoryData *extension = [[store categories] anyObject];
 	NSArray *methods = [extension.methods methods];
@@ -350,7 +351,7 @@
 	GBClangBasedParser *parser = [GBClangBasedParser parserWithSettingsProvider:[GBTestObjectsRegistry mockSettingsProvider]];
 	GBStore *store = [[GBStore alloc] init];
 	// execute
-	[parser parseObjectsFromString:@"@interface MyClass(MyCategory) @property (readonly) int name; @end" sourceFile:@"filename.h" toStore:store];
+	[parser parseObjectsFromString:@"@interface MyClass @end @interface MyClass(MyCategory) @property (readonly) int name; @end" sourceFile:@"filename.h" toStore:store];
 	// verify
 	GBCategoryData *extension = [[store categories] anyObject];
 	NSArray *methods = [extension.methods methods];
@@ -365,7 +366,7 @@
 	GBClangBasedParser *parser = [GBClangBasedParser parserWithSettingsProvider:[GBTestObjectsRegistry mockSettingsProvider]];
 	GBStore *store = [[GBStore alloc] init];
 	// execute
-	[parser parseObjectsFromString:@"@implementation MyClass(MyCategory) -(void)method { } @end" sourceFile:@"filename.h" toStore:store];
+	[parser parseObjectsFromString:@"@interface MyClass @end @implementation MyClass(MyCategory) -(void)method { } @end" sourceFile:@"filename.h" toStore:store];
 	// verify
 	GBCategoryData *category = [[store categories] anyObject];
 	NSArray *methods = [category.methods methods];
@@ -380,8 +381,8 @@
 	GBClangBasedParser *parser = [GBClangBasedParser parserWithSettingsProvider:[GBTestObjectsRegistry mockSettingsProvider]];
 	GBStore *store = [[GBStore alloc] init];
 	// execute
-	[parser parseObjectsFromString:@"@interface MyClass(MyCategory) -(void)method1; @end" sourceFile:@"filename1.h" toStore:store];
-	[parser parseObjectsFromString:@"@interface MyClass(MyCategory) -(void)method2; @end" sourceFile:@"filename2.h" toStore:store];
+	[parser parseObjectsFromString:@"@interface MyClass @end @interface MyClass(MyCategory) -(void)method1; @end" sourceFile:@"filename1.h" toStore:store];
+	[parser parseObjectsFromString:@"@interface MyClass @end @interface MyClass(MyCategory) -(void)method2; @end" sourceFile:@"filename2.h" toStore:store];
 	// verify - simple testing here, details within GBModelBaseTesting!
 	assertThatInteger([[store categories] count], equalToInteger(1));
 	GBClassData *category = [[store categories] anyObject];
@@ -396,8 +397,8 @@
 	GBClangBasedParser *parser = [GBClangBasedParser parserWithSettingsProvider:[GBTestObjectsRegistry mockSettingsProvider]];
 	GBStore *store = [[GBStore alloc] init];
 	// execute
-	[parser parseObjectsFromString:@"@implementation MyClass(MyCategory) -(void)method1{} @end" sourceFile:@"filename1.m" toStore:store];
-	[parser parseObjectsFromString:@"@implementation MyClass(MyCategory) -(void)method2{} @end" sourceFile:@"filename2.m" toStore:store];
+	[parser parseObjectsFromString:@"@interface MyClass @end @implementation MyClass(MyCategory) -(void)method1{} @end" sourceFile:@"filename1.m" toStore:store];
+	[parser parseObjectsFromString:@"@interface MyClass @end @implementation MyClass(MyCategory) -(void)method2{} @end" sourceFile:@"filename2.m" toStore:store];
 	// verify - simple testing here, details within GBModelBaseTesting!
 	assertThatInteger([[store categories] count], equalToInteger(1));
 	GBClassData *category = [[store categories] anyObject];
@@ -412,8 +413,8 @@
 	GBClangBasedParser *parser = [GBClangBasedParser parserWithSettingsProvider:[GBTestObjectsRegistry mockSettingsProvider]];
 	GBStore *store = [[GBStore alloc] init];
 	// execute
-	[parser parseObjectsFromString:@"@interface MyClass(MyCategory) -(void)method1; @end" sourceFile:@"filename.h" toStore:store];
-	[parser parseObjectsFromString:@"@implementation MyClass(MyCategory) -(void)method2{} @end" sourceFile:@"filename.m" toStore:store];
+	[parser parseObjectsFromString:@"@interface MyClass @end @interface MyClass(MyCategory) -(void)method1; @end" sourceFile:@"filename.h" toStore:store];
+	[parser parseObjectsFromString:@"@interface MyClass @end @implementation MyClass(MyCategory) -(void)method2{} @end" sourceFile:@"filename.m" toStore:store];
 	// verify - simple testing here, details within GBModelBaseTesting!
 	assertThatInteger([[store categories] count], equalToInteger(1));
 	GBClassData *category = [[store categories] anyObject];
@@ -430,8 +431,8 @@
 	GBClangBasedParser *parser = [GBClangBasedParser parserWithSettingsProvider:[GBTestObjectsRegistry mockSettingsProvider]];
 	GBStore *store = [[GBStore alloc] init];
 	// execute
-	[parser parseObjectsFromString:@"@interface MyClass() -(void)method1; @end" sourceFile:@"filename1.h" toStore:store];
-	[parser parseObjectsFromString:@"@interface MyClass() -(void)method2; @end" sourceFile:@"filename2.h" toStore:store];
+	[parser parseObjectsFromString:@"@interface MyClass @end @interface MyClass() -(void)method1; @end" sourceFile:@"filename1.h" toStore:store];
+	[parser parseObjectsFromString:@"@interface MyClass @end @interface MyClass() -(void)method2; @end" sourceFile:@"filename2.h" toStore:store];
 	// verify - simple testing here, details within GBModelBaseTesting!
 	assertThatInteger([[store categories] count], equalToInteger(1));
 	GBCategoryData *category = [[store categories] anyObject];
