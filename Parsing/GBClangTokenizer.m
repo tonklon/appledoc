@@ -7,6 +7,8 @@
 //
 
 #import "GBClangTokenizer.h"
+#import "GBDataObjects.h"
+#import "GBSourceInfo.h"
 
 @interface GBClangTokenizer ()
 
@@ -18,10 +20,21 @@
 @property (assign) CXToken* tokens;
 @property (assign) unsigned tokenCount;
 @property (assign) CXCursor* cursors;
+@property (assign) unsigned currentToken;
+@property (assign) CXCursorSet processedCursors;
   
 - (void)createTranslationUnitWithArguments:(NSArray*)arguments;
 - (void)tokenize;
 - (void)annotateTokens;
+- (void)prepareForIteration;
+- (GBModelBase*)currentEntity;
+- (GBClassData*)classEntityFromCurrentCursor;
+- (GBCategoryData*)categoryEntityFromCurrentCursor;
+- (GBProtocolData*)protocolEntityFromCurrentCursor;
+- (GBSourceInfo*)sourceInfoForCurrentToken;
+- (GBSourceInfo*)sourceInfoForTokenNumber:(unsigned)tokenNumber;
+- (GBComment*)findLastComment;
+- (NSString*)stripCommentEnclosure:(NSString*)enclosedComment;
 
 @end
 
@@ -39,6 +52,8 @@
     
     [self createTranslationUnitWithArguments:arguments];
     [self tokenize];
+    [self annotateTokens];
+    [self prepareForIteration];
   }
   return self;
 }
@@ -51,11 +66,14 @@
 @synthesize tokens;
 @synthesize tokenCount;
 @synthesize cursors;
+@synthesize currentToken;
+@synthesize processedCursors;
 
 - (void)dealloc {
   clang_disposeTokens(self.tu, self.tokens, self.tokenCount);
   clang_disposeTranslationUnit(self.tu);
-
+  clang_disposeCXCursorSet(self.processedCursors);
+  
   free(self.cursors);
   
   [super dealloc];
@@ -139,11 +157,255 @@
   self.cursors = localCursors;
 }
 
-#pragma mark - public
+#define CX2NS_STRING(name, value)\
+CXString name ## str = value;\
+const char *name ## C = clang_getCString(name ## str);\
+NSString* name = [NSString stringWithUTF8String:name ## C];\
+clang_disposeString( name ## str);
 
-- (GBModelBase*)getNextEntity {
+
+- (void)prepareForIteration {
+  self.processedCursors = clang_createCXCursorSet();
+  self.currentToken = 0;
+}
+
+- (GBModelBase*)currentEntity {
+  
+  CXCursor currentCursor = cursors[currentToken];
+  
+  if (0 == clang_CXCursorSet_contains(processedCursors, currentCursor)) {
+    return nil;
+  }
+  
+  clang_CXCursorSet_insert(processedCursors, currentCursor);
+  
+  switch (currentCursor.kind)
+  {
+    case CXCursor_ClassDecl:
+    case CXCursor_ObjCInterfaceDecl:
+    case CXCursor_ObjCImplementationDecl:
+      return [self classEntityFromCurrentCursor];
+      break;
+      
+    case CXCursor_ObjCCategoryDecl:
+    case CXCursor_ObjCCategoryImplDecl:
+      return [self categoryEntityFromCurrentCursor];
+      break;
+      
+    case CXCursor_ObjCProtocolDecl:
+      return [self protocolEntityFromCurrentCursor];
+      break;
+      
+    default:
+      return nil;
+      break;
+   }
+  
   return nil;
 }
 
- 
+- (GBClassData*)classEntityFromCurrentCursor {
+  
+  CXCursor currentCursor = cursors[currentToken];
+  
+  CX2NS_STRING(className, clang_getCursorSpelling(currentCursor));
+  
+  GBClassData* class = [[GBClassData alloc] initWithName:className];
+  [class registerSourceInfo:[self sourceInfoForCurrentToken]];
+  
+  clang_visitChildrenWithBlock(currentCursor,
+    ^enum CXChildVisitResult (CXCursor current, CXCursor parent){
+      
+      switch (current.kind) {
+        case CXCursor_ObjCSuperClassRef:
+        {
+          CX2NS_STRING(superclass, clang_getCursorSpelling(current));
+          class.nameOfSuperclass = superclass;
+          break;
+        }
+        case CXCursor_ObjCProtocolRef:
+        {
+          CX2NS_STRING(protocolName, clang_getCursorSpelling(current));
+          GBProtocolData *protocol = [[GBProtocolData alloc] initWithName:protocolName];
+          [class.adoptedProtocols registerProtocol:protocol];
+          break;
+        }
+        case CXCursor_ObjCClassMethodDecl:
+        case CXCursor_ObjCInstanceMethodDecl:
+        {
+          CX2NS_STRING(methodName, clang_getCursorSpelling(current));
+          
+          NSArray* argumentNames = [methodName componentsSeparatedByString:@":"];
+          
+          CXType type = clang_getCursorResultType(current);
+          
+          NSString* typeName = nil;
+          if (0 == clang_isPODType(type)) {
+            CX2NS_STRING(typeKind, clang_getTypeKindSpelling(type.kind));
+            typeName = typeKind;
+          } else {
+            CXCursor typeCursor = clang_getTypeDeclaration(type);
+            CX2NS_STRING(declarationName, clang_getCursorSpelling(typeCursor));
+            typeName = declarationName;
+          }
+          
+          NSMutableArray* methodArguments = [NSMutableArray array];
+          
+          clang_visitChildrenWithBlock(current,
+            ^enum CXChildVisitResult (CXCursor current, CXCursor parent){
+              switch (current.kind) {
+                case CXCursor_ParmDecl:
+                {
+                  CX2NS_STRING(name, clang_getCursorSpelling(current));
+                 
+                  CXType type = clang_getCursorType(current);
+                  NSString* typeName = nil;
+                  if (0 == clang_isPODType(type)) {
+                    CX2NS_STRING(typeKind, clang_getTypeKindSpelling(type.kind));
+                    typeName = typeKind;
+                  } else {
+                    CXCursor typeCursor = clang_getTypeDeclaration(type);
+                    CX2NS_STRING(declarationName, clang_getCursorSpelling(typeCursor));
+                    typeName = declarationName;
+                  }
+                  
+                  NSString* argumentName = [argumentNames objectAtIndex:[methodArguments count]];
+                  GBMethodArgument* argument = [[GBMethodArgument alloc] initWithName:argumentName types:[NSArray arrayWithObject:typeName] var:[NSArray arrayWithObject:name] terminationMacros:nil];
+                  [methodArguments addObject:argument];
+                  
+                  break;  
+                }
+                default: {
+
+                  break;
+                }
+              }
+              return CXChildVisit_Continue;                        
+            });
+          
+          GBMethodType methodKind;
+          if (current.kind == CXCursor_ObjCInstanceMethodDecl) {
+            methodKind = GBMethodTypeInstance;
+          } else {
+            methodKind = GBMethodTypeClass;
+          }
+          
+          // If no arguments, we still need one to transport the method name
+          if ([methodArguments count] == 0) {
+            GBMethodArgument* noRealArgument = [[GBMethodArgument alloc] initWithName:[argumentNames objectAtIndex:0] types:[NSArray array] var:nil terminationMacros:nil];
+            [methodArguments addObject:noRealArgument];
+          }
+
+          GBMethodData* method = [[GBMethodData alloc] initWithType:methodKind attributes:nil result:[NSArray arrayWithObject:typeName] arguments:methodArguments];
+          
+          [class.methods registerMethod:method];
+          break;
+        }
+        case CXCursor_ObjCPropertyDecl: {
+
+          break;
+        }
+        default:
+        {
+          break;
+        }
+      }
+      
+      
+      return CXChildVisit_Continue;
+  });
+  
+  GBComment* comment = [self findLastComment];
+  
+  if (comment) {
+    class.comment =comment;
+  }
+  
+  return class;
+}
+
+- (GBCategoryData*)categoryEntityFromCurrentCursor {
+  return nil;
+}
+
+- (GBProtocolData*)protocolEntityFromCurrentCursor {
+  return nil;
+}
+
+- (GBSourceInfo*)sourceInfoForCurrentToken {
+  
+  return [self sourceInfoForTokenNumber:currentToken];
+}
+
+- (GBSourceInfo*)sourceInfoForTokenNumber:(unsigned)tokenNumber {
+  CXSourceLocation location = clang_getTokenLocation(self.tu, tokens[tokenNumber]);
+  CXFile theFile;
+  unsigned theLine;
+  
+  clang_getInstantiationLocation(location, &theFile, &theLine, NULL, NULL);
+  
+  CX2NS_STRING(fileName, clang_getFileName(theFile));
+  
+  return [GBSourceInfo infoWithFilename:fileName lineNumber:theLine];
+}
+
+- (GBComment*)findLastComment {
+  unsigned possibleCommentTokenIdx = currentToken;
+  
+  NSString* lastComment = nil;
+  
+  while ((possibleCommentTokenIdx > 0) && (lastComment == nil)) {
+    
+    possibleCommentTokenIdx--;
+    
+    CXToken possibleCommentToken = tokens[possibleCommentTokenIdx];
+    
+    if (clang_getTokenKind(possibleCommentToken) == CXToken_Comment) {
+      CX2NS_STRING(commentContents, clang_getTokenSpelling(self.tu, possibleCommentToken));
+      lastComment = commentContents;
+    }
+  }
+  
+  if ([[lastComment stringByTrimmingWhitespaceAndNewLine] length] == 0) {
+    return nil;
+  }
+
+  lastComment = [self stripCommentEnclosure:lastComment];
+  
+  GBSourceInfo* sourceInfo = [self sourceInfoForTokenNumber:possibleCommentTokenIdx];
+  
+  GBComment* comment = [GBComment commentWithStringValue:lastComment sourceInfo:sourceInfo];
+  
+  return comment;
+}
+
+- (NSString*)stripCommentEnclosure:(NSString*)enclosedComment {
+  NSString* workingCopy = enclosedComment;
+  
+  NSCharacterSet* slashCharacterSet = [NSCharacterSet characterSetWithCharactersInString:@"/"];
+  workingCopy = [workingCopy stringByTrimmingCharactersInSet:slashCharacterSet];
+  
+  NSCharacterSet* starCharacterSet = [NSCharacterSet characterSetWithCharactersInString:@"*"];
+  workingCopy = [workingCopy stringByTrimmingCharactersInSet:starCharacterSet];
+  
+  workingCopy = [workingCopy stringByTrimmingWhitespaceAndNewLine];
+  
+  return workingCopy;
+}
+
+#pragma mark - public
+
+- (GBModelBase*)getNextEntity {
+
+  GBModelBase* nextEntity = nil;
+  
+  while ((self.currentToken < self.tokenCount) && (nil == nextEntity)) {
+    nextEntity = [self currentEntity];
+    self.currentToken++;
+  }
+  
+  return nextEntity;
+}
+
+
 @end
