@@ -84,7 +84,7 @@
 	GBClangBasedParser *parser = [GBClangBasedParser parserWithSettingsProvider:[GBTestObjectsRegistry mockSettingsProvider]];
 	GBStore *store = [[GBStore alloc] init];
 	// execute
-	[parser parseObjectsFromString:@"@interface MyClass : NSObject @end" sourceFile:@"filename.h" toStore:store];
+	[parser parseObjectsFromString:@"#import <Foundation/Foundation.h>\n @interface MyClass : NSObject @end" sourceFile:@"filename.h" toStore:store];
 	// verify
 	GBClassData *class = [[store classes] anyObject];
 	assertThat(class.nameOfSuperclass, is(@"NSObject"));
@@ -195,9 +195,12 @@
 	GBStore *store = [[GBStore alloc] init];
 	// execute
 	[parser parseObjectsFromString:
+   @"#import <Foundation/Foundation.h>\n"
+   @"\n"
+   @"#define SOMETHING\n"
 	 @"/** Comment */\n"
 	 @"#ifdef SOMETHING\n"
-	 @"@interface MyClass : SuperClass\n"
+	 @"@interface MyClass : NSProxy\n"
 	 @"#else\n"
 	 @"@interface MyClass\n"
 	 @"#endif\n"
@@ -205,7 +208,7 @@
 	// verify
 	GBClassData *class = [[store classes] anyObject];
 	assertThat(class.nameOfClass, is(@"MyClass"));
-	assertThat(class.nameOfSuperclass, is(@"SuperClass"));
+	assertThat(class.nameOfSuperclass, is(@"NSProxy"));
 	assertThat(class.comment.stringValue, is(@"Comment"));
 }
 
@@ -228,7 +231,7 @@
 	GBClangBasedParser *parser = [GBClangBasedParser parserWithSettingsProvider:[GBTestObjectsRegistry mockSettingsProvider]];
 	GBStore *store = [[GBStore alloc] init];
 	// execute
-	[parser parseObjectsFromString:@"@interface MyClass : NSObject <Protocol> @end" sourceFile:@"filename.h" toStore:store];
+	[parser parseObjectsFromString:@"#import <Foundation/Foundation.h>\n@protocol Protocol\n@end\n @interface MyClass : NSObject <Protocol> @end" sourceFile:@"filename.h" toStore:store];
 	// verify
 	GBClassData *class = [[store classes] anyObject];
 	NSArray *protocols = [class.adoptedProtocols protocolsSortedByName];
@@ -241,7 +244,7 @@
 	GBClangBasedParser *parser = [GBClangBasedParser parserWithSettingsProvider:[GBTestObjectsRegistry mockSettingsProvider]];
 	GBStore *store = [[GBStore alloc] init];
 	// execute
-	[parser parseObjectsFromString:@"@interface MyClass <Protocol> @end" sourceFile:@"filename.h" toStore:store];
+	[parser parseObjectsFromString:@"@protocol Protocol\n@end\n@interface MyClass <Protocol> @end" sourceFile:@"filename.h" toStore:store];
 	// verify
 	GBClassData *class = [[store classes] anyObject];
 	NSArray *protocols = [class.adoptedProtocols protocolsSortedByName];
