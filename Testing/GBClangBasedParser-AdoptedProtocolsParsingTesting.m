@@ -22,7 +22,7 @@
 	GBClangBasedParser *parser = [GBClangBasedParser parserWithSettingsProvider:[GBTestObjectsRegistry mockSettingsProvider]];
 	GBStore *store = [[GBStore alloc] init];
 	// execute
-	[parser parseObjectsFromString:@"@interface MyClass <MyProtocol> @end" sourceFile:@"filename.h" toStore:store];
+	[parser parseObjectsFromString:@"@protocol MyProtocol @end @interface MyClass <MyProtocol> @end" sourceFile:@"filename.h" toStore:store];
 	// verify
 	NSArray *protocols = [[[[store classes] anyObject] adoptedProtocols] protocolsSortedByName];
 	assertThatInteger([protocols count], equalToInteger(1));
@@ -34,7 +34,7 @@
 	GBClangBasedParser *parser = [GBClangBasedParser parserWithSettingsProvider:[GBTestObjectsRegistry mockSettingsProvider]];
 	GBStore *store = [[GBStore alloc] init];
 	// execute
-	[parser parseObjectsFromString:@"@interface MyClass <MyProtocol1, MyProtocol2> @end" sourceFile:@"filename.h" toStore:store];
+	[parser parseObjectsFromString:@"@protocol MyProtocol1 @end @ protocol MyProtocol2 @end @interface MyClass <MyProtocol1, MyProtocol2> @end" sourceFile:@"filename.h" toStore:store];
 	// verify
 	NSArray *protocols = [[[[store classes] anyObject] adoptedProtocols] protocolsSortedByName];
 	assertThatInteger([protocols count], equalToInteger(2));
