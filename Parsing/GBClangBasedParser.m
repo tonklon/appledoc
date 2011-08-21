@@ -99,6 +99,21 @@
   [super dealloc];
 }
 
+@end
+
+@implementation GBClangBasedParser (ClangInterface)
+
+- (NSArray*)clangArgumentsForFilename:(NSString*)filename {
+  return [NSArray arrayWithObjects:
+          @"-isysroot/Developer/SDKs/MacOSX10.7.sdk",
+          @"-xobjective-c",
+          nil];
+}
+
+@end
+
+@implementation GBClangBasedParser (StoreManagement)
+
 - (void)registerEntityWithStore:(GBModelBase*)entity {
   if ([entity isKindOfClass:[GBClassData class]]) {
     GBClassData* class = (GBClassData*)entity;
@@ -113,23 +128,6 @@
     [self registerCategoryWithStore:category];
   }
 }
-
-@end
-
-@implementation GBClangBasedParser (ClangInterface)
-
-- (NSArray*)clangArgumentsForFilename:(NSString*)filename {
-  return [NSArray arrayWithObjects:
-          @"-isysroot/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator5.0.sdk" ,
-          @"-xobjective-c",
-          @"-std=gnu99",
-          @"-D__IPHONE_OS_VERSION_MIN_REQUIRED=30000",
-          nil];
-}
-
-@end
-
-@implementation GBClangBasedParser (StoreManagement)
 
 - (void)registerClassWithStore:(GBClassData *)class {
   NSParameterAssert([class isKindOfClass:[GBClassData class]]);
